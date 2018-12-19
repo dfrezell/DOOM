@@ -10,6 +10,10 @@ CFLAGS=-g -Wall -DNORMALUNIX -DLINUX # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lnsl -lm
 
+SRC:=$(wildcard *.c)
+HDR:=$(wildcard *.h)
+IND:=$(patsubst %.c,%.i,$(SRC)) $(patsubst %.h,%.i,$(HDR))
+
 # subdirectory for objects
 O=linux
 
@@ -89,6 +93,15 @@ $(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
 
 $(O)/%.o:	%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+indent: $(IND)
+
+%.i: %.c
+	gindent $?
+
+%.i: %.h
+	gindent $?
+
 
 #############################################################
 #
