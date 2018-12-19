@@ -22,7 +22,6 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #ifdef __GNUG__
 #pragma implementation "doomdef.h"
 #endif
@@ -31,5 +30,3 @@
 // Location for any defines turned variables.
 
 // None.
-
-
