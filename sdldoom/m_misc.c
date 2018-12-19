@@ -62,8 +62,7 @@
 //
 extern patch_t *hu_font[HU_FONTSIZE];
 
-int
-                M_DrawText(int x, int y, boolean direct, char *string) {
+int M_DrawText(int x, int y, boolean direct, char *string) {
     int             c;
     int             w;
 
@@ -118,8 +117,7 @@ boolean M_WriteFile(char const *name, void *source, int length) {
 //
 // M_ReadFile
 //
-int
-                M_ReadFile(char const *name, byte ** buffer) {
+int M_ReadFile(char const *name, byte ** buffer) {
     int             handle, count, length;
     struct stat     fileinfo;
     byte           *buf;
@@ -184,12 +182,6 @@ extern int      showMessages;
 // machine-independent sound params
 extern int      numChannels;
 
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-extern char    *sndserver_filename;
-extern int      mb_used;
-#endif
-
 #ifdef LINUX
 char           *mousetype;
 char           *mousedev;
@@ -197,74 +189,72 @@ char           *mousedev;
 
 extern char    *chat_macros[];
 
+#define DEF_TYPE_INT 0
+#define DEF_TYPE_STR 1
+
 typedef struct {
     char           *name;
-    int            *location;
-    int             defaultvalue;
+    int type;
+    union {
+        int *pnum;
+        char **pstr;
+    } location;
+    union {
+        int   num;
+        char *str;
+    } defaultvalue;
     int             scantranslate;  // PC scan code hack
     int             untranslated;   // lousy hack
 } default_t;
 
 default_t       defaults[] = {
-    {"mouse_sensitivity", &mouseSensitivity, 5},
-    {"sfx_volume", &snd_SfxVolume, 8},
-    {"music_volume", &snd_MusicVolume, 8},
-    {"show_messages", &showMessages, 1},
+    {"mouse_sensitivity", DEF_TYPE_INT, { .pnum = &mouseSensitivity }, { .num = 5 }},
+    {"sfx_volume",        DEF_TYPE_INT, { .pnum = &snd_SfxVolume },    { .num = 8 }},
+    {"music_volume",      DEF_TYPE_INT, { .pnum = &snd_MusicVolume },  { .num = 8 }},
+    {"show_messages",     DEF_TYPE_INT, { .pnum = &showMessages },     { .num = 1 }},
 
 #ifdef NORMALUNIX
-    {"key_right", &key_right, KEY_RIGHTARROW},
-    {"key_left", &key_left, KEY_LEFTARROW},
-    {"key_up", &key_up, KEY_UPARROW},
-    {"key_down", &key_down, KEY_DOWNARROW},
-    {"key_strafeleft", &key_strafeleft, ','},
-    {"key_straferight", &key_straferight, '.'},
+    {"key_right",         DEF_TYPE_INT, { .pnum = &key_right },        { .num = KEY_RIGHTARROW }},
+    {"key_left",          DEF_TYPE_INT, { .pnum = &key_left },         { .num = KEY_LEFTARROW }},
+    {"key_up",            DEF_TYPE_INT, { .pnum = &key_up },           { .num = KEY_UPARROW }},
+    {"key_down",          DEF_TYPE_INT, { .pnum = &key_down },         { .num = KEY_DOWNARROW }},
+    {"key_strafeleft",    DEF_TYPE_INT, { .pnum = &key_strafeleft },   { .num = ',' }},
+    {"key_straferight",   DEF_TYPE_INT, { .pnum = &key_straferight },  { .num = '.' }},
 
-    {"key_fire", &key_fire, KEY_RCTRL},
-    {"key_use", &key_use, ' '},
-    {"key_strafe", &key_strafe, KEY_RALT},
-    {"key_speed", &key_speed, KEY_RSHIFT},
-
-// UNIX hack, to be removed. 
-#ifdef SNDSERV
-    {"sndserver", (int *)&sndserver_filename, (int)"sndserver"},
-    {"mb_used", &mb_used, 2},
+    {"key_fire",          DEF_TYPE_INT, { .pnum = &key_fire },         { .num = KEY_RCTRL }},
+    {"key_use",           DEF_TYPE_INT, { .pnum = &key_use },          { .num = ' ' }},
+    {"key_strafe",        DEF_TYPE_INT, { .pnum = &key_strafe },       { .num = KEY_RALT }},
+    {"key_speed",         DEF_TYPE_INT, { .pnum = &key_speed },        { .num = KEY_RSHIFT }},
 #endif
 
-#endif
+    {"use_mouse",         DEF_TYPE_INT, { .pnum = &usemouse },         { .num = 1 }},
+    {"mouseb_fire",       DEF_TYPE_INT, { .pnum = &mousebfire },       { .num = 0 }},
+    {"mouseb_strafe",     DEF_TYPE_INT, { .pnum = &mousebstrafe },     { .num = 1 }},
+    {"mouseb_forward",    DEF_TYPE_INT, { .pnum = &mousebforward },    { .num = 2 }},
 
-#ifdef LINUX
-    {"mousedev", (int *)&mousedev, (int)"/dev/ttyS0"},
-    {"mousetype", (int *)&mousetype, (int)"microsoft"},
-#endif
+    {"use_joystick",      DEF_TYPE_INT, { .pnum = &usejoystick },      { .num = 0 }},
+    {"joyb_fire",         DEF_TYPE_INT, { .pnum = &joybfire },         { .num = 0 }},
+    {"joyb_strafe",       DEF_TYPE_INT, { .pnum = &joybstrafe },       { .num = 1 }},
+    {"joyb_use",          DEF_TYPE_INT, { .pnum = &joybuse },          { .num = 3 }},
+    {"joyb_speed",        DEF_TYPE_INT, { .pnum = &joybspeed },        { .num = 2 }},
 
-    {"use_mouse", &usemouse, 1},
-    {"mouseb_fire", &mousebfire, 0},
-    {"mouseb_strafe", &mousebstrafe, 1},
-    {"mouseb_forward", &mousebforward, 2},
+    {"screenblocks",      DEF_TYPE_INT, { .pnum = &screenblocks },     { .num = 9 }},
+    {"detaillevel",       DEF_TYPE_INT, { .pnum = &detailLevel },      { .num = 0 }},
 
-    {"use_joystick", &usejoystick, 0},
-    {"joyb_fire", &joybfire, 0},
-    {"joyb_strafe", &joybstrafe, 1},
-    {"joyb_use", &joybuse, 3},
-    {"joyb_speed", &joybspeed, 2},
+    {"snd_channels",      DEF_TYPE_INT, { .pnum = &numChannels },      { .num = 3 }},
 
-    {"screenblocks", &screenblocks, 9},
-    {"detaillevel", &detailLevel, 0},
+    {"usegamma",          DEF_TYPE_INT, { .pnum = &usegamma },         { .num = 0 }},
 
-    {"snd_channels", &numChannels, 3},
-
-    {"usegamma", &usegamma, 0},
-
-    {"chatmacro0", (int *)&chat_macros[0], (int)HUSTR_CHATMACRO0},
-    {"chatmacro1", (int *)&chat_macros[1], (int)HUSTR_CHATMACRO1},
-    {"chatmacro2", (int *)&chat_macros[2], (int)HUSTR_CHATMACRO2},
-    {"chatmacro3", (int *)&chat_macros[3], (int)HUSTR_CHATMACRO3},
-    {"chatmacro4", (int *)&chat_macros[4], (int)HUSTR_CHATMACRO4},
-    {"chatmacro5", (int *)&chat_macros[5], (int)HUSTR_CHATMACRO5},
-    {"chatmacro6", (int *)&chat_macros[6], (int)HUSTR_CHATMACRO6},
-    {"chatmacro7", (int *)&chat_macros[7], (int)HUSTR_CHATMACRO7},
-    {"chatmacro8", (int *)&chat_macros[8], (int)HUSTR_CHATMACRO8},
-    {"chatmacro9", (int *)&chat_macros[9], (int)HUSTR_CHATMACRO9}
+    {"chatmacro0",        DEF_TYPE_STR, { .pstr = &chat_macros[0] },   { .str = HUSTR_CHATMACRO0 }},
+    {"chatmacro1",        DEF_TYPE_STR, { .pstr = &chat_macros[1] },   { .str = HUSTR_CHATMACRO1 }},
+    {"chatmacro2",        DEF_TYPE_STR, { .pstr = &chat_macros[2] },   { .str = HUSTR_CHATMACRO2 }},
+    {"chatmacro3",        DEF_TYPE_STR, { .pstr = &chat_macros[3] },   { .str = HUSTR_CHATMACRO3 }},
+    {"chatmacro4",        DEF_TYPE_STR, { .pstr = &chat_macros[4] },   { .str = HUSTR_CHATMACRO4 }},
+    {"chatmacro5",        DEF_TYPE_STR, { .pstr = &chat_macros[5] },   { .str = HUSTR_CHATMACRO5 }},
+    {"chatmacro6",        DEF_TYPE_STR, { .pstr = &chat_macros[6] },   { .str = HUSTR_CHATMACRO6 }},
+    {"chatmacro7",        DEF_TYPE_STR, { .pstr = &chat_macros[7] },   { .str = HUSTR_CHATMACRO7 }},
+    {"chatmacro8",        DEF_TYPE_STR, { .pstr = &chat_macros[8] },   { .str = HUSTR_CHATMACRO8 }},
+    {"chatmacro9",        DEF_TYPE_STR, { .pstr = &chat_macros[9] },   { .str = HUSTR_CHATMACRO9 }}
 
 };
 
@@ -277,7 +267,6 @@ char           *defaultfile;
 void M_SaveDefaults(void)
 {
     int             i;
-    int             v;
     FILE           *f;
 
     f = fopen(defaultfile, "w");
@@ -286,16 +275,16 @@ void M_SaveDefaults(void)
 
     for (i = 0; i < numdefaults; i++)
     {
-        if (defaults[i].defaultvalue > -0xfff
-            && defaults[i].defaultvalue < 0xfff)
-        {
-            v = *defaults[i].location;
-            fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
-        }
-        else
-        {
-            fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name,
-                    *(char **)(defaults[i].location));
+        switch (defaults[i].type) {
+            case DEF_TYPE_INT:
+                fprintf(f, "%s\t\t%i\n", defaults[i].name, *defaults[i].location.pnum);
+                break;
+            case DEF_TYPE_STR:
+                fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name, *defaults[i].location.pstr);
+                break;
+            default:
+                I_Error("M_SaveDefaults: unknown type: %d", defaults[i].type);
+                break;
         }
     }
 
@@ -321,7 +310,19 @@ void M_LoadDefaults(void)
     // set everything to base values
     numdefaults = sizeof(defaults) / sizeof(defaults[0]);
     for (i = 0; i < numdefaults; i++)
-        *defaults[i].location = defaults[i].defaultvalue;
+    {
+        switch (defaults[i].type) {
+            case DEF_TYPE_INT:
+                *defaults[i].location.pnum = defaults[i].defaultvalue.num;
+                break;
+            case DEF_TYPE_STR:
+                *defaults[i].location.pstr = defaults[i].defaultvalue.str;
+                break;
+            default:
+                I_Error("M_LoadDefaults: unknown type: %d", defaults[i].type);
+                break;
+        }
+    }
 
     // check for a custom default file
     i = M_CheckParm("-config");
@@ -352,16 +353,26 @@ void M_LoadDefaults(void)
                     strcpy(newstring, strparm + 1);
                 }
                 else if (strparm[0] == '0' && strparm[1] == 'x')
+                    // read hex value
                     sscanf(strparm + 2, "%x", &parm);
                 else
+                    // read decimal value
                     sscanf(strparm, "%i", &parm);
+
+                // scan defaults table to find matching entry
                 for (i = 0; i < numdefaults; i++)
                     if (!strcmp(def, defaults[i].name))
                     {
+                        if (isstring && (defaults[i].type != DEF_TYPE_STR))
+                        {
+                            I_Error("M_LoadDefaults: invalid type reassignment: %s\n", defaults[i].name);
+                            break;
+                        }
+
                         if (!isstring)
-                            *defaults[i].location = parm;
+                            *defaults[i].location.pnum = parm;
                         else
-                            *defaults[i].location = (int)newstring;
+                            *defaults[i].location.pstr = newstring;
                         break;
                     }
             }
@@ -403,12 +414,7 @@ typedef struct {
 //
 // WritePCXfile
 //
-void     
-         
-         
-         
-        WritePCXfile
-        (char *filename, byte * data, int width, int height, byte * palette) {
+void WritePCXfile (char *filename, byte * data, int width, int height, byte * palette) {
     int             i;
     int             length;
     pcx_t          *pcx;
