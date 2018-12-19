@@ -34,23 +34,42 @@ typedef enum { false, true } boolean;
 typedef unsigned char byte;
 #endif
 
-// Predefined with some OS.
-#ifdef LINUX
-#include <values.h>
-#else
-#define MAXCHAR		((char)0x7f)
-#define MAXSHORT	((short)0x7fff)
+
+#include <limits.h>
+
+#ifndef MAXCHAR
+#define MAXCHAR		((char)SCHAR_MAX)
+#endif // MAXCHAR
+
+#ifndef MAXSHORT
+#define MAXSHORT	((short)SHRT_MAX)
+#endif // MAXSHORT
 
 // Max pos 32-bit int.
-#define MAXINT		((int)0x7fffffff)
-#define MAXLONG		((long)0x7fffffff)
-#define MINCHAR		((char)0x80)
-#define MINSHORT	((short)0x8000)
+#ifndef MAXINT
+#define MAXINT		((int)INT_MAX)
+#endif // MAXINT
+
+#ifndef MAXLONG
+#define MAXLONG		((long)LONG_MAX)
+#endif // MAXLONG
+
+#ifndef MINCHAR
+#define MINCHAR		((char)SCHAR_MIN)
+#endif // MINCHAR
+
+#ifndef MINSHORT
+#define MINSHORT	((short)SHRT_MIN)
+#endif // MINSHORT
 
 // Max negative 32-bit integer.
-#define MININT		((int)0x80000000)
-#define MINLONG		((long)0x80000000)
-#endif
+#ifndef MININT
+#define MININT		((int)INT_MIN)
+#endif // MININT
+
+#ifndef MINLONG
+#define MINLONG		((long)LONG_MIN)
+#endif // MINLONG
 
 #endif
 //-----------------------------------------------------------------------------

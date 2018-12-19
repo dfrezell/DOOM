@@ -28,6 +28,7 @@
 #pragma implementation "m_bbox.h"
 #endif
 #include "m_bbox.h"
+#include "doomtype.h"
 
 void M_ClearBox(fixed_t * box)
 {
