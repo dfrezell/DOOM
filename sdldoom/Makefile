@@ -6,7 +6,7 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-g -Wall -DNORMALUNIX -DLINUX
+CFLAGS=-g -Wall -DNORMALUNIX -DLINUX -m32
 LDFLAGS=
 LIBS=-lm
 

@@ -5,7 +5,7 @@ MAINTAINER Drew Frezell <dfrezell@gmail.com>
 VOLUME /code
 
 RUN apt-get update
-RUN apt-get -y install build-essential
+RUN apt-get -y install build-essential gcc-multilib
 
 WORKDIR /code
 ENV SHELL /bin/bash
